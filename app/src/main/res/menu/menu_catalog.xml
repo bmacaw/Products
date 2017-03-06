@@ -6,13 +6,13 @@
     tools:context=".CatalogActivity">
 
     <item
-        android:id="@+id/action_insert_dummy_data"
+        android:id="@+id/action_insert_sample_data"
         android:title="@string/action_insert_sample_data"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_delete_all_entries"
         android:title="@string/action_delete_all_entries"
-        app:showAsAction="never" />>
+        app:showAsAction="never" />
 
 </menu>
