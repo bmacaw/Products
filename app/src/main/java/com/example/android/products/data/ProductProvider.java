@@ -33,7 +33,7 @@ public class ProductProvider extends ContentProvider {
         mDbHelper = new ProductDbHelper(getContext());
         return true;
     }
-    
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
