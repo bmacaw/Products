@@ -40,6 +40,9 @@
     <!-- Label for Select Image Button-->
     <string name="take_picture_button">Camera</string>
 
+    <!-- Label for Sell button -->
+    <string name="sell_one_button">Sell 1</string>
+
     <!-- Label for order information in the editor [CHAR LIMIT=30] -->
     <string name="category_order">Order</string>
 

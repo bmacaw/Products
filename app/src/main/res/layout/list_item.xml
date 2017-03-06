@@ -8,19 +8,13 @@
     android:orientation="horizontal"
     android:padding="@dimen/activity_margin">
 
-    <!--<ImageView
-        android:id="@+id/list_item_image_view"
-        android:layout_width="@dimen/list_item_height"
-        android:layout_height="@dimen/list_item_height"
-        android:scaleType="centerCrop" />-->
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="@dimen/list_item_height"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/product_name"
+            android:id="@+id/product_name_list_view_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
@@ -29,7 +23,7 @@
             tools:text="Diving Snorkel Set"/>
 
         <TextView
-            android:id="@+id/current_quantity"
+            android:id="@+id/quantity_list_view_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
@@ -38,7 +32,7 @@
             tools:text="Current Stock: 10"/>
 
         <TextView
-            android:id="@+id/price"
+            android:id="@+id/price_list_view_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
@@ -47,4 +41,10 @@
             tools:text="Price: $89.95"/>
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/list_view_sell_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sell_one_button"/>
 </LinearLayout>

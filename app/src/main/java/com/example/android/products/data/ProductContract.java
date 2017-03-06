@@ -28,6 +28,7 @@ public class ProductContract {
         public final static String COLUMN_PRODUCT_QUANTITY = "quantity";
         public final static String COLUMN_PRODUCT_PRICE = "price";
         public final static String COLUMN_PRODUCT_IMAGE = "image_uri";
+        public final static String COLUMN_PRODUCT_SOLD = "sold";
         public final static String COLUMN_PRODUCT_SUPPLIER = "supplier";
     }
 }
