@@ -13,12 +13,15 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.products.data.ProductContract.ProductEntry;
@@ -29,11 +32,30 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private static final int EXISTING_PRODUCT_LOADER = 0;
 
+    private static final int PICK_IMAGE_REQUEST = 0;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int MY_PERMISSIONS_REQUEST = 2;
+
+    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products";
+
     private EditText mNameEditText;
     private EditText mQuantityEditText;
     private EditText mPriceEditText;
     private ImageView mImageView;
     private EditText mSupplierEditText;
+
+    // TODO remove later
+    private TextView mImageString;
+
+    private Button mSelectImageButton;
+    private Button mTakePictureButton;
+
+    private boolean isGalleryPicture = false;
+
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+
+    private static final String CAMERA_DIR = "/dcim/";
 
     private boolean mProductHasChanged = false;
 
@@ -51,6 +73,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         mCurrentProductUri = intent.getData();
