@@ -46,7 +46,13 @@
         <provider
             android:name=".data.ProductProvider"
             android:authorities="com.example.android.products"
-            android:exported="false" />
-    </application>
+            android:exported="false"
+            android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_provider_paths" />
+        </provider>
 
+    </application>
+    
 </manifest>
