@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.view.LayoutInflater;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -14,11 +13,9 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.example.android.products.data.ProductContract.ProductEntry;
-import com.example.android.products.R;
+
 
 public class ProductCursorAdaptor extends CursorAdapter {
-
-    public static final String LOG_TAG = ProductCursorAdaptor.class.getSimpleName();
     private Context mContexts;
 
 
@@ -27,32 +24,14 @@ public class ProductCursorAdaptor extends CursorAdapter {
         mContexts = context;
     }
 
-    public static class ProductViewHolder {
-        public final TextView mNameTextView;
-        public final TextView mQuantityTextView;
-        public final TextView mPriceTextView;
-        public final Button mSellOneButtons;
-
-        public ProductViewHolder(View view) {
-            mNameTextView = (TextView) view.findViewById(R.id.product_name_list_view_text_view);
-            mQuantityTextView = (TextView) view.findViewById(R.id.quantity_list_view_text_view);
-            mPriceTextView = (TextView) view.findViewById(R.id.price_list_view_text_view);
-            mSellOneButtons = (Button) view.findViewById(R.id.list_view_sell_button);
-        }
-    }
-
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item, viewGroup, false);
-        ProductViewHolder productViewHolder = new ProductViewHolder(view);
-        view.setTag(productViewHolder);
-        return view;
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+
+        return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
-        ProductViewHolder productViewHolder = (ProductViewHolder) view.getTag();
 
         final String productName = cursor.getString(cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_NAME));
         final int quantity = cursor.getInt(cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY));
@@ -64,14 +43,21 @@ public class ProductCursorAdaptor extends CursorAdapter {
         String priceString = "Price $" + priceValue;
         final Uri uri = ProductEntry.CONTENT_URI;
 
-        productViewHolder.mNameTextView.setText(productName);
-        productViewHolder.mQuantityTextView.setText(quantityString);
-        productViewHolder.mPriceTextView.setText(priceString);
 
-        productViewHolder.mSellOneButtons.setOnClickListener(new View.OnClickListener() {
+        TextView mNameTextView = (TextView) view.findViewById(R.id.product_name_list_view_text_view);
+        TextView mQuantityTextView = (TextView) view.findViewById(R.id.quantity_list_view_text_view);
+        TextView mPriceTextView = (TextView) view.findViewById(R.id.price_list_view_text_view);
+        TextView mSellOneButtons = (Button) view.findViewById(R.id.list_view_sell_button);
+
+
+        mNameTextView.setText(productName);
+        mQuantityTextView.setText(quantityString);
+        mPriceTextView.setText(priceString);
+
+        mSellOneButtons.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(LOG_TAG, "Quantity " + quantity);
+
                 ContentResolver resolver = view.getContext().getContentResolver();
                 ContentValues newValues = new ContentValues();
                 if (quantity > 0) {
@@ -86,9 +72,6 @@ public class ProductCursorAdaptor extends CursorAdapter {
                 }
             }
         });
-
-
-
-
     }
 }
+

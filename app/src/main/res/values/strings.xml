@@ -19,8 +19,8 @@
     <!-- Label for editor overflow menu option that deletes the current product [CHAR LIMIT=20] -->
     <string name="action_delete">Delete</string>
 
-    <!-- Label for overview category of attributes in the editor [CHAR LIMIT=30] -->
-    <string name="category_overview">Overview</string>
+    <!-- Label for product name category of attributes in the editor [CHAR LIMIT=30] -->
+    <string name="category_product_name">Product</string>
 
     <!-- Label for quantity information in the editor [CHAR LIMIT=30] -->
     <string name="category_current_quantity">In Stock</string>
@@ -32,7 +32,7 @@
     <string name="category_supplier">Supplier</string>
 
     <!-- Label for editing image information in the editor [CHAR LIMIT=30] -->
-    <string name="edit_image">Change Image</string>
+    <string name="edit_image">Add Image</string>
 
     <!-- Label for Select Image Button-->
     <string name="select_image_button">Gallery</string>
@@ -56,13 +56,7 @@
     <string name="hint_product_name">Product name</string>
 
     <!-- Text hint for product name field in the editor [CHAR LIMIT=30] -->
-    <string name="hint_supplier">Supplier</string>
-
-    <!-- Text hint for short product description field in the editor [CHAR LIMIT=30] -->
-    <string name="hint_short_product_description">Short description</string>
-
-    <!-- Text hint for product description field in the editor [CHAR LIMIT=30] -->
-    <string name="hint_product_description">Description</string>
+    <string name="hint_supplier">Enter supplier</string>
 
     <!-- Text hint for product quantity field in the editor [CHAR LIMIT=30] -->
     <string name="hint_product_quantity">0</string>
