@@ -27,8 +27,7 @@ public class ProductDbHelper extends SQLiteOpenHelper {
                 ProductEntry.COLUMN_PRODUCT_PRICE + " REAL, " +
                 ProductEntry.COLUMN_PRODUCT_IMAGE + " TEXT, " +
                 ProductEntry.COLUMN_PRODUCT_SOLD + " INTEGER, " +
-                ProductEntry.COLUMN_PRODUCT_SUPPLIER + " TEXT" +
-                " );";
+                ProductEntry.COLUMN_PRODUCT_SUPPLIER + " TEXT)";
 
         db.execSQL(SQL_CREATE_PRODUCTS_TABLE);
 
@@ -37,6 +36,5 @@ public class ProductDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // The database is still at version 1, so there's nothing to be done here.
-
     }
 }

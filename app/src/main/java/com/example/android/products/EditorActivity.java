@@ -1,28 +1,52 @@
 package com.example.android.products;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
-import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import com.example.android.products.data.ProductContract.ProductEntry;
 
@@ -36,6 +60,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 2;
 
+    private static final String CAPTURED_IMAGE_PATH_KEY = "currentImagePath";
+    private final static String CAPTURED_IMAGE_URI_KEY = "mImageUri";
+
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products";
 
     private EditText mNameEditText;
@@ -45,17 +72,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mSupplierEditText;
 
     // TODO remove later
-    private TextView mImageString;
+    private TextView mImageTextView;
+
+    private Bitmap mBitmap;
 
     private Button mSelectImageButton;
     private Button mTakePictureButton;
 
     private boolean isGalleryPicture = false;
 
+    // TODO remove or use
     private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
 
     private static final String CAMERA_DIR = "/dcim/";
+    public String currentImagePath;
+    private Uri mImageUri;
+    private Uri mCurrentProductUri;
 
     private boolean mProductHasChanged = false;
 
@@ -66,8 +99,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return false;
         }
     };
-
-    private Uri mCurrentProductUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,11 +122,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierEditText = (EditText) findViewById(R.id.edit_supplier);
         mImageView = (ImageView) findViewById(R.id.editor_image_view);
 
+        // TODO remove
+        mImageTextView = (TextView) findViewById(R.id.image_text_view);
+
+        mSelectImageButton = (Button) findViewById(R.id.select_image_button);
+
+        mTakePictureButton = (Button) findViewById(R.id.take_picture_button);
+        mTakePictureButton.setEnabled(false);
+
         mNameEditText.setOnTouchListener(mTouchListener);
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
         mSupplierEditText.setOnTouchListener(mTouchListener);
-        // TODO ? mImageView.setOnTouchListener(mTouchListener);
+        mImageView.setOnTouchListener(mTouchListener);
+
+        requestPermissions();
     }
 
     private void saveProduct() {
@@ -103,14 +144,20 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
-        // TODO Image uriString
+        String imageString;
+
+        if (mImageUri != null) {
+            imageString = mImageUri.toString();
+        } else {
+            imageString = "";
+        }
 
         ContentValues values = new ContentValues();
         values.put(ProductEntry.COLUMN_PRODUCT_NAME, nameString);
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantityString);
         values.put(ProductEntry.COLUMN_PRODUCT_PRICE, priceString);
         values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplierString);
-        // TODO Image uriString
+        values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, imageString);
 
         if (mCurrentProductUri == null) {
 
@@ -131,6 +178,314 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Toast.makeText(this, getString(R.string.editor_update_product_successful), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        if (currentImagePath != null) {
+            savedInstanceState.putString(CAPTURED_IMAGE_PATH_KEY, currentImagePath);
+        }
+        if (mImageUri != null) {
+            savedInstanceState.putString(CAPTURED_IMAGE_URI_KEY, mImageUri.toString());
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
+    /**
+     * onRestoreInstanceState method below
+     * @param savedInstanceState
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState.containsKey(CAPTURED_IMAGE_PATH_KEY)) {
+            currentImagePath = savedInstanceState.getString(CAPTURED_IMAGE_PATH_KEY);
+        }
+        if (savedInstanceState.containsKey(CAPTURED_IMAGE_URI_KEY)) {
+            mImageUri = Uri.parse(savedInstanceState.getString(CAPTURED_IMAGE_URI_KEY));
+        }
+        ViewTreeObserver treeObserver = mImageView.getViewTreeObserver();
+        treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
+                mImageView.setImageBitmap(mBitmap);
+            }
+        });
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+    public void requestPermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            mTakePictureButton.setEnabled(true);
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    mTakePictureButton.setEnabled(true);
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    public void openImageSelector(View view) {
+        Intent intent;
+        Log.e(LOG_TAG, "While is set and the ifs are worked through.");
+
+        if (Build.VERSION.SDK_INT < 19) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+
+        // Show only images, no videos or anything else
+        Log.e(LOG_TAG, "Check write to external permissions");
+
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    public void takePicture(View view) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        try {
+            File f = createImageFile();
+
+            Log.d(LOG_TAG, "File: " + f.getAbsolutePath());
+
+            mImageUri = FileProvider.getUriForFile(
+                    this, FILE_PROVIDER_AUTHORITY, f);
+
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+
+            // Solution taken from http://stackoverflow.com/a/18332000/3346625
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    grantUriPermission(packageName, mImageUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+            }
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        Log.i(LOG_TAG, "Received an \"Activity Result\"");
+        // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
+        // If the request code seen here doesn't match, it's the response to some other intent,
+        // and the below code shouldn't run at all.
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.  Pull that uri using "resultData.getData()"
+
+            if (resultData != null) {
+                mImageUri = resultData.getData();
+                Log.i(LOG_TAG, "Uri: " + mImageUri.toString());
+
+
+                mImageTextView.setText(mImageUri.toString());
+                mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
+                mImageView.setImageBitmap(mBitmap);
+                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                isGalleryPicture = true;
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            Log.i(LOG_TAG, "Uri: " + mImageUri.toString());
+
+            mImageTextView.setText(mImageUri.toString());
+            mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
+            mImageView.setImageBitmap(mBitmap);
+            mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            isGalleryPicture = false;
+        }
+    }
+
+    private Bitmap getBitmapFromUri(ImageView mImageView, Uri uri, Context context) {
+        if (uri == null) {
+            Log.v(LOG_TAG, "Uri from getBitmapFromUri class method is null, double CHECK");
+            return null;
+        }
+        /**
+         * Have to divide the imageView with image but using the width and height of both
+         */
+
+        int targetImageWidth = mImageView.getWidth();
+        int targetImageHeight = mImageView.getHeight();
+        ParcelFileDescriptor parcelFileDescriptor = null;
+        try {
+            /** parcelFileDescriptor openFile method String mode is gonna be (only read access here "r")
+             * parcel -> file with description which was inside parcel ->
+             * ...**/
+            parcelFileDescriptor = context.getContentResolver().openFileDescriptor(uri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            //put to null while decoding -> avoid memory allocation
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+            int optionsW = options.outWidth; //resulting width
+            int optionsH = options.outHeight; //resulting height
+
+            //get minimum for scaling and change inJustDecodeBounds = false;
+            int scaling = Math.min(optionsW / targetImageWidth, optionsH / targetImageHeight);
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = scaling;
+            options.inPurgeable = true; //for lollipop and below
+            /** After scaling we can decode it from file descriptor again **/
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+            /** Create Bitmap (Rotation fixes) **/
+            if (image.getWidth() > image.getHeight()) {
+                //if width more than height
+                Matrix mat = new Matrix();
+                int degreesOfRotation = 90;
+                mat.postRotate(degreesOfRotation);
+                Bitmap imageRotate_1 = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), mat, true);
+                return imageRotate_1;
+            } else {
+                return image;
+            }
+
+        } catch (Exception e) {
+            Log.v(LOG_TAG, "Could not load image file. ", e);
+            return null;
+        } finally {
+            try {
+                if (parcelFileDescriptor != null) {
+                    parcelFileDescriptor.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.v(LOG_TAG, "Couldn't close Parcel File Descriptor.");
+            }
+        }
+    }
+
+    public String getFilePath() {
+
+        Cursor returnCursor =
+                getContentResolver().query(mImageUri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+
+        returnCursor.moveToFirst();
+        String fileName = returnCursor.getString(returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+        return fileName;
+    }
+
+    public boolean saveBitmapToFile(File dir, String fileName, Bitmap bm,
+                                    Bitmap.CompressFormat format, int quality) {
+        File imageFile = new File(dir, fileName);
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(imageFile);
+            bm.compress(format, quality, fos);
+            fos.close();
+
+            return true;
+        } catch (IOException e) {
+            Log.e("app", e.getMessage());
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        //Create access to storage directory DCIM
+        File albumF = getAlbumDir();
+        //Create image File
+        File imageF = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                albumF
+
+        );
+        currentImagePath = "file:" + imageF.getAbsolutePath();
+        return imageF;
+    }
+
+    private File getAlbumDir() {
+        File storageDir = null;
+
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+
+            storageDir = new File(Environment.getExternalStorageDirectory()
+                    + CAMERA_DIR
+                    + getString(R.string.app_name));
+
+            Log.d(LOG_TAG, "Dir: " + storageDir);
+
+            if (storageDir != null) {
+                if (!storageDir.mkdirs()) {
+                    if (!storageDir.exists()) {
+                        Log.d(LOG_TAG, "failed to create directory");
+                        return null;
+                    }
+                }
+            }
+
+        } else {
+            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+        }
+
+        return storageDir;
     }
 
     @Override
@@ -180,52 +535,40 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
     @Override
     public void onBackPressed() {
-        // If the pet hasn't changed, continue with handling back button press
         if (!mProductHasChanged) {
             super.onBackPressed();
             return;
         }
 
-        // Otherwise if there are unsaved changes, setup a dialog to warn the user.
-        // Create a click listener to handle the user confirming that changes should be discarded.
         DialogInterface.OnClickListener discardButtonClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                // User clicked "Discard" button, close the current activity.
                 finish();
             }
         };
 
-        // Show dialog that there are unsaved changes
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
     private void showUnsavedChangesDialog(
             DialogInterface.OnClickListener discardButtonClickListener) {
-        // Create AlertDialog.Builder and set the message, and click listeners
-        // for the positive and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.unsaved_changes_dialog_msg);
         builder.setPositiveButton(R.string.discard, discardButtonClickListener);
         builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Keep editing" button, so dismiss the dialog
-                // and continue editing the pet.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
             }
         });
 
-        // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
 
     }
 
     private void showDeleteConfirmationDialog() {
-        // Create an AlertDialog.Builder and set the message, and click listeners
-        // for the positive and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
@@ -236,8 +579,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the pet.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -270,8 +611,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 ProductEntry.COLUMN_PRODUCT_NAME,
                 ProductEntry.COLUMN_PRODUCT_QUANTITY,
                 ProductEntry.COLUMN_PRODUCT_PRICE,
+                ProductEntry.COLUMN_PRODUCT_IMAGE,
                 ProductEntry.COLUMN_PRODUCT_SUPPLIER};
-                // TODO ProductEntry.COLUMN_PRODUCT_IMAGE
+
         return new CursorLoader(this, mCurrentProductUri, projection, null, null, null);
     }
 
@@ -287,22 +629,25 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int quantityColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
             int priceColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
             int supplierColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER);
-            // TODO int imageColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_IMAGE);
+            int imageColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_IMAGE);
 
             String name = cursor.getString(nameColumnIndex);
             int quantity = cursor.getInt(quantityColumnIndex);
             double price = cursor.getDouble(priceColumnIndex);
             String supplier = cursor.getString(supplierColumnIndex);
-            // TODO image
+            final String image = cursor.getString(imageColumnIndex);
 
             mNameEditText.setText(name);
-            mQuantityEditText.setText(Integer.toString(quantity));
-            mPriceEditText.setText(Double.toString(price));
+            mQuantityEditText.setText(String.valueOf(quantity));
+            mPriceEditText.setText(String.valueOf(price));
             mSupplierEditText.setText(supplier);
-            // TODO  Image
 
+            if (!image.isEmpty()) {
+                mImageUri = Uri.parse(image);
+                mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
+                mImageView.setImageBitmap(mBitmap);
+            }
         }
-
     }
 
     @Override
@@ -312,7 +657,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setText("");
         mPriceEditText.setText("");
         mSupplierEditText.setText("");
-        // TODO mImageView
 
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Layout for the editor -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -106,7 +105,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/activity_horizontal_margin">
 
         <!-- Label -->
         <TextView
@@ -135,6 +135,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
@@ -149,14 +150,10 @@
 
             <ImageView
                 android:id="@+id/editor_image_view"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
+                android:paddingTop="10dp"
+                android:layout_width="220dp"
+                android:layout_height="120dp"
                 android:scaleType="centerCrop" />
-
-            <TextView
-                android:id="@+id/image_uri"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
 
@@ -175,7 +172,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:orientation="horizontal"
-            android:paddingLeft="4dp">
+            android:paddingLeft="4dp"
+            android:paddingTop="10dp">
 
             <!-- Edit Image Buttons -->
             <Button
@@ -195,8 +193,9 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/image_string"
+    <!-- TODO remove later-->
+     <TextView
+        android:id="@+id/image_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="ithinkthefilepathorsomethingthatwillhelpwillbehere"/>

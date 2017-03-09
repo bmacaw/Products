@@ -85,6 +85,18 @@
     <!-- Subtitle text for the empty view that prompts the user to add a product [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding a product</string>
 
+    <!-- Dialog message when user wants to delete all products in CatagoryActivity [CHAR LIMIT=NONE] -->
+    <string name="delete_all_products_one_dialog_msg">Do you want to delete all products?</string>
+
+    <!-- Dialog message warning user that ALL products will be deleted [CHAR LIMIT=NONE] -->
+    <string name="delete_all_products_two_dialog_msg">Delete all products</string>
+
+    <!-- Dialog message to confirm deletion of all products in CategoryActivity [CHAR LIMIT=NONE] -->
+    <string name="confirm_all_products_delete">Delete all</string>
+
+    <!-- Dialog message to cancel deletion of all products in CategoryActivity [CHAR LIMIT=NONE] -->
+    <string name="confirm_cancel_dialog_msg">Cancel</string>
+
     <!-- Dialog message when user is leaving editor but hasn't saved changes [CHAR LIMIT=NONE] -->
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
 
