@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Layout for the editor -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,35 +8,7 @@
     android:padding="@dimen/activity_margin"
     tools:context=".DetailActivity">
 
-    <!-- TODO ????? adjust for email action to order look at MyFileProviderExample editor activity for toolbar, etc.
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:fitsSystemWindows="true"
-tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity">
-
-<android.support.design.widget.AppBarLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:theme="@style/AppTheme.AppBarOverlay">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-</android.support.design.widget.AppBarLayout>
-
-<include layout="@layout/content_main" />
-
-</android.support.design.widget.CoordinatorLayout>-->
-
-
-    <!-- Overview category -->
+    <!-- Product category -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -50,6 +23,7 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:layout_weight="2"
             android:orientation="vertical"
             android:paddingLeft="4dp">
@@ -58,7 +32,6 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
             <TextView
                 android:id="@+id/product_name_text_view"
                 style="@style/DetailFieldStyle"
-                android:paddingBottom="4dp"
                 tools:text="Aqua Lung Sport" />
 
         </LinearLayout>
@@ -68,6 +41,7 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
@@ -91,11 +65,67 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
         </RelativeLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView style="@style/CategoryStyle" />
+
+        <!-- Display fields -->
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:paddingLeft="4dp">
+
+            <!-- Change quantity ordered field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/decrement_quantity_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="@string/decrement_quantity_button" />
+
+                <TextView
+                    android:id="@+id/change_quantity_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="0"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/increment_quantity_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="@string/increment_quantity_button" />
+
+                <Button
+                    android:id="@+id/update_quantity_button"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/update_quantity_button" />
+
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
     <!-- Price category -->
     <LinearLayout
         android:id="@+id/container_price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
@@ -116,10 +146,6 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
                 style="@style/DetailFieldStyle"
                 tools:text="89.95" />
 
-            <!-- Units for price (Dollars) -->
-            <TextView
-                android:id="@+id/label_price_units"
-                style="@style/DetailFieldStyle" />
         </RelativeLayout>
 
     </LinearLayout>
@@ -128,6 +154,7 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
@@ -137,11 +164,11 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
 
             <ImageView
                 android:id="@+id/detail_image_view"
-                android:paddingTop="10dp"
                 android:layout_width="220dp"
                 android:layout_height="150dp"
                 android:scaleType="centerCrop" />
@@ -154,6 +181,7 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
@@ -177,102 +205,60 @@ tools:context="co.carlosandresjimenez.android.myfileproviderexample.MainActivity
         </RelativeLayout>
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/edit_product_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_mode_edit_white_24dp" />
-
     <!-- Order category -->
     <LinearLayout
         android:id="@+id/container_order"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="horizontal">
 
         <!-- Label -->
         <TextView
             style="@style/CategoryStyle"
             android:text="@string/category_order" />
-
-        <!-- Input field -->
+        <!-- Order Button -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/order_increment_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:onClick="increment"
-                android:text="+" />
-
-            <TextView
-                android:id="@+id/order_text_view"
-                android:layout_width="wrap_content"
+            <!-- Change quantity ordered field -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:text="0"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/detail_activity_order_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="order"
-                android:text="order" />
+                <Button
+                    android:id="@+id/decrement_order_quantity_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="@string/decrement_order_quantity_button" />
 
-        </LinearLayout>
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/number_ordered_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="0"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
 
-    <!-- Sell category -->
-    <LinearLayout
-        android:id="@+id/container_sell"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                <Button
+                    android:id="@+id/increment_order_quantity_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="@string/increment_order_quantity_button" />
 
-        <!-- Label -->
-        <TextView
-            style="@style/CategoryStyle"
-            android:text="@string/category_sell" />
+                <Button
+                    android:id="@+id/detail_activity_order_button"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/order_quantity_button" />
 
-        <!-- Input field -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/sell_increment_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:onClick="increment"
-                android:text="+" />
-
-            <TextView
-                android:id="@+id/sell_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                tools:text="0" />
-
-            <Button
-                android:id="@+id/detail_activity_sell_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="sell"
-                android:text="sell" />
+            </LinearLayout>
 
         </LinearLayout>
     </LinearLayout>

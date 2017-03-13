@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.android.products.CatalogActivity">
+
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
@@ -17,14 +18,14 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true">
 
-        <!--<ImageView
+        <ImageView
             android:id="@+id/empty_inventory_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_empty_inventory"/>-->
+            android:src="@drawable/inventory_boxes_icon" />
 
-        <!--<TextView
+        <TextView
             android:id="@+id/empty_title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,9 +34,9 @@
             android:fontFamily="sans-serif-medium"
             android:paddingTop="16dp"
             android:text="@string/empty_view_title_text"
-            android:textAppearance="?android:textAppearanceMedium"/>-->
+            android:textAppearance="?android:textAppearanceMedium"/>
 
-        <!--<TextView
+        <TextView
             android:id="@+id/empty_subtitle_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,7 +46,7 @@
             android:paddingTop="8dp"
             android:text="@string/empty_view_subtitle_text"
             android:textAppearance="?android:textAppearanceSmall"
-            android:textColor="#A2AAB0"/>-->
+            android:textColor="#A2AAB0"/>
     </RelativeLayout>
 
 
@@ -56,6 +57,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp"/>
+        android:src="@drawable/ic_add_white_24dp" />
 </RelativeLayout>
 

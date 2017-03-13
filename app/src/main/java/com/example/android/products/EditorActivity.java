@@ -9,46 +9,43 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.util.Log;
+
+import com.example.android.products.data.ProductContract.ProductEntry;
+
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
-import com.example.android.products.data.ProductContract.ProductEntry;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -64,29 +61,22 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private final static String CAPTURED_IMAGE_URI_KEY = "mImageUri";
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products";
-
+    // TODO remove or use
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+    private static final String CAMERA_DIR = "/dcim/";
+    public String currentImagePath;
     private EditText mNameEditText;
     private EditText mQuantityEditText;
     private EditText mPriceEditText;
     private ImageView mImageView;
     private EditText mSupplierEditText;
-
     // TODO remove later
     private TextView mImageTextView;
-
     private Bitmap mBitmap;
-
     private Button mSelectImageButton;
     private Button mTakePictureButton;
-
     private boolean isGalleryPicture = false;
-
-    // TODO remove or use
-    private static final String JPEG_FILE_PREFIX = "IMG_";
-    private static final String JPEG_FILE_SUFFIX = ".jpg";
-
-    private static final String CAMERA_DIR = "/dcim/";
-    public String currentImagePath;
     private Uri mImageUri;
     private Uri mCurrentProductUri;
 
@@ -108,13 +98,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         Intent intent = getIntent();
         mCurrentProductUri = intent.getData();
 
-        if (mCurrentProductUri == null) {
-            setTitle(R.string.editor_activity_title_new_product);
-            invalidateOptionsMenu();
-        } else {
-            getLoaderManager().initLoader(EXISTING_PRODUCT_LOADER, null, this);
-            setTitle(R.string.editor_activity_title_edit_product);
-        }
+        setTitle(R.string.editor_activity_title_new_product);
 
         mNameEditText = (EditText) findViewById(R.id.edit_product_name);
         mQuantityEditText = (EditText) findViewById(R.id.edit_current_quantity);
@@ -141,25 +125,40 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private void saveProduct() {
         String nameString = mNameEditText.getText().toString().trim();
-        String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
+        String quantityString = mQuantityEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
-        String imageString;
 
-        if (mImageUri != null) {
-            imageString = mImageUri.toString();
+        /*
+        * Compare product name to existing products in the database and
+        * check for null string values for product name, price and supplier.
+        */
+        if (isExistingProduct(nameString)) {
+            createToastMessage(getResources().getString(R.string.product_exists_message));
+
+        } else if (isInvalidStringForField(nameString) ||
+                isInvalidStringForField(priceString) ||
+                isInvalidStringForField(supplierString)) {
+
+            createToastMessage(getResources().getString(R.string.required_fields_message));
+            createToastMessage(getResources().getString(R.string.editor_insert_product_failed));
+
         } else {
-            imageString = "";
-        }
 
-        ContentValues values = new ContentValues();
-        values.put(ProductEntry.COLUMN_PRODUCT_NAME, nameString);
-        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantityString);
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, priceString);
-        values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplierString);
-        values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, imageString);
+            // If there is and image, set it to mImageUri.toString().
+            String imageString;
+            if (mImageUri != null) {
+                imageString = mImageUri.toString();
+            } else {
+                imageString = "";
+            }
 
-        if (mCurrentProductUri == null) {
+            ContentValues values = new ContentValues();
+            values.put(ProductEntry.COLUMN_PRODUCT_NAME, nameString);
+            values.put(ProductEntry.COLUMN_PRODUCT_PRICE, priceString);
+            values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantityString);
+            values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, imageString);
+            values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplierString);
 
             Uri newUri = getContentResolver().insert(ProductEntry.CONTENT_URI, values);
 
@@ -168,18 +167,51 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             } else {
                 Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_SHORT).show();
             }
-        }else {
-
-            int rowsAffected = getContentResolver().update(mCurrentProductUri, values, null, null);
-
-            if (rowsAffected == 0) {
-                Toast.makeText(this, getString(R.string.editor_update_product_failed), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, getString(R.string.editor_update_product_successful), Toast.LENGTH_SHORT).show();
-            }
         }
     }
-    @Override
+
+    /*
+    * This method uses the product name to check if the product already
+    * exists in the database, and is therefore not unique.
+    */
+    private boolean isExistingProduct(String productName) {
+        Cursor cursor = getContentResolver().query(
+                ProductEntry.CONTENT_URI,
+                new String[]{ProductEntry.COLUMN_PRODUCT_NAME},
+                ProductEntry.COLUMN_PRODUCT_NAME + " = ?",
+                new String[]{productName},
+                null);
+
+        boolean productRecordExists;
+
+        if (cursor != null) {
+            productRecordExists = cursor.getCount() > 0;
+            cursor.close();
+        } else {
+            productRecordExists = false;
+        }
+        return productRecordExists;
+    }
+
+    /*
+    * These methods check validity for entries in product name, quantity,
+    * price, image and supplier edit text fields.
+    */
+    // TODO remove
+    private boolean isInvalidStringForField(String string) { return string == null || string.equals(""); }
+    private boolean isInvalidIntegerForField(int quantity) { return  quantity < 0;}
+    private boolean isInvalidDoubleForField(double price) { return price < 0;}
+
+    /*
+    * This method generates a toast message to the user indicating one or more invalid entries.
+    */
+    private void createToastMessage (String toastMessage) {
+        Toast.makeText(EditorActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    // TODO remove or use
+
+    /*@Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         if (currentImagePath != null) {
             savedInstanceState.putString(CAPTURED_IMAGE_PATH_KEY, currentImagePath);
@@ -189,10 +221,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
         super.onSaveInstanceState(savedInstanceState);
     }
-    /**
-     * onRestoreInstanceState method below
-     * @param savedInstanceState
-     */
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState.containsKey(CAPTURED_IMAGE_PATH_KEY)) {
@@ -210,11 +239,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
         super.onRestoreInstanceState(savedInstanceState);
-    }
+    }*/
+
     public void requestPermissions() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) ||
@@ -241,6 +271,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mTakePictureButton.setEnabled(true);
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -409,42 +440,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    public String getFilePath() {
-
-        Cursor returnCursor =
-                getContentResolver().query(mImageUri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
-
-        returnCursor.moveToFirst();
-        String fileName = returnCursor.getString(returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-
-        return fileName;
-    }
-
-    public boolean saveBitmapToFile(File dir, String fileName, Bitmap bm,
-                                    Bitmap.CompressFormat format, int quality) {
-        File imageFile = new File(dir, fileName);
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(imageFile);
-            bm.compress(format, quality, fos);
-            fos.close();
-
-            return true;
-        } catch (IOException e) {
-            Log.e("app", e.getMessage());
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-
-        return false;
-    }
-
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -523,16 +518,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
                 DialogInterface.OnClickListener discardButtonClickListener =
                         new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        NavUtils.navigateUpFromSameTask(EditorActivity.this);
-                    }
-                };
-            showUnsavedChangesDialog(discardButtonClickListener);
-            return true;
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                            }
+                        };
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onBackPressed() {
         if (!mProductHasChanged) {

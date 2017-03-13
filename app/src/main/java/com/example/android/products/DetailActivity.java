@@ -7,20 +7,19 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
-import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,34 +42,26 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public static final String LOG_TAG = DetailActivity.class.getSimpleName();
 
     private static final int SEND_MAIL_REQUEST = 1;
-
-    private ContentResolver mContentResolver;
-
     private static final int PRODUCTS_CURSOR = 0;
-
+    int changeQuantity = 0;
+    int numberOrdered = 0;
     private Bitmap mBitmap;
-    private String mProductName;
-    private int mQuantity;
-    private double mProductPrice;
     private Uri mImageUri;
-    private int mSold;
-    private String mSupplier;
-
     private boolean mProductHasChanged = false;
-
     private Uri mCurrentProductUri;
     private TextView mNameTextView;
     private TextView mQuantityTextView;
     private TextView mPriceTextView;
     private ImageView mImageView;
-    private TextView mOrderTextView;
-    private TextView mSoldTextView;
     private TextView mSupplierTextView;
-    private Button mAddOrderButton;
-    private Button mAddSellButton;
+    private TextView mChangeQuantityTextView;
+    private TextView mNumberOrderedTextView;
+    private Button mUpdateQuantityButton;
+    private Button mIncrementButton;
+    private Button mDecrementButton;
     private Button mOrderButton;
-    private Button mSellButton;
-    private ViewTreeObserver mViewTree;
+    private Button mIncrementOrderButton;
+    private Button mDecrementOrderButton;
 
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -86,51 +77,157 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mContentResolver = getContentResolver();
         mCurrentProductUri = getIntent().getData();
-
-        // Setup FAB to open EditorActivity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.edit_product_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(DetailActivity.this, EditorActivity.class);
-                intent.setData(mCurrentProductUri);
-                startActivity(intent);
-            }
-        });
 
         mNameTextView = (TextView) findViewById(R.id.product_name_text_view);
         mQuantityTextView = (TextView) findViewById(R.id.current_quantity_text_view);
         mPriceTextView = (TextView) findViewById(R.id.product_price_text_view);
         mImageView = (ImageView) findViewById(R.id.detail_image_view);
         mSupplierTextView = (TextView) findViewById(R.id.supplier_text_view);
-        mOrderTextView = (TextView) findViewById(R.id.order_text_view);
-        mSoldTextView = (TextView) findViewById(R.id.sell_text_view);
+        mChangeQuantityTextView = (TextView) findViewById(R.id.change_quantity_text_view);
+        mUpdateQuantityButton = (Button) findViewById(R.id.update_quantity_button);
+        mNumberOrderedTextView = (TextView) findViewById(R.id.number_ordered_text_view);
         mOrderButton = (Button) findViewById(R.id.detail_activity_order_button);
-        mAddOrderButton = (Button) findViewById(R.id.order_increment_button);
-        mSellButton = (Button) findViewById(R.id.detail_activity_sell_button);
-        mAddSellButton = (Button) findViewById(R.id.sell_increment_button);
+        mIncrementButton = (Button) findViewById(R.id.increment_quantity_button);
+        mDecrementButton = (Button) findViewById(R.id.decrement_quantity_button);
+        mIncrementOrderButton = (Button) findViewById(R.id.increment_order_quantity_button);
+        mDecrementOrderButton = (Button) findViewById(R.id.decrement_order_quantity_button);
+
 
         mQuantityTextView.setOnTouchListener(mTouchListener);
 
-        mCurrentProductUri = getIntent().getData();
+
+        mIncrementButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                increment(mChangeQuantityTextView);
+
+            }
+        });
+
+        mDecrementButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                decrement(mChangeQuantityTextView);
+            }
+        });
+
+        mUpdateQuantityButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                updateQuantity(mQuantityTextView);
+                mProductHasChanged = true;
+            }
+        });
+
+        mIncrementOrderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                incrementNumberOrdered(mNumberOrderedTextView);
+
+            }
+        });
+
+        mDecrementOrderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                decrementNumberOrdered(mNumberOrderedTextView);
+            }
+        });
+
 
         mOrderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendEmail();
+                submitOrderEmail();
             }
         });
 
         getLoaderManager().initLoader(PRODUCTS_CURSOR, null, this);
     }
 
-    private void sendEmail() {
+    /**
+     * This method is called when the quantity subtract button is clicked.
+     */
+    public void increment(View view) {
+        changeQuantity++;
+        quantityChange(changeQuantity);
+    }
+
+    /**
+     * This method is called when the quantity add button is clicked.
+     */
+    public void decrement(View view) {
+        if (changeQuantity > 0) {
+            changeQuantity--;
+        }
+        quantityChange(changeQuantity);
+    }
+
+    /**
+     * This method displays the given quantity value on the screen.
+     */
+    private void quantityChange(int number) {
+        TextView quantityTextView = (TextView) findViewById(R.id.change_quantity_text_view);
+        quantityTextView.setText("" + number);
+    }
+
+    /**
+     * This method is called when the update quantity button is clicked.
+     */
+    public void updateQuantity(View view) {
+        String quantityChange = (String) mChangeQuantityTextView.getText();
+        String quantity = (String) mQuantityTextView.getText();
+
+        int updatedQuantityValue = Integer.parseInt(quantityChange) + Integer.parseInt(quantity);
+
+        ContentResolver resolver = view.getContext().getContentResolver();
+        ContentValues newValue = new ContentValues();
+
+        newValue.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, updatedQuantityValue);
+        resolver.update(mCurrentProductUri, newValue, null, null);
+    }
+
+
+    /**
+     * This method is called when the quantity subtract button is clicked.
+     */
+    public void incrementNumberOrdered(View view) {
+        numberOrdered++;
+        displayNumberOrdered(numberOrdered);
+    }
+
+    /**
+     * This method is called when the quantity add button is clicked.
+     */
+    public void decrementNumberOrdered(View view) {
+        if (numberOrdered > 0) {
+            numberOrdered--;
+        }
+        displayNumberOrdered(numberOrdered);
+    }
+
+    /**
+     * This method displays the order quantity value on the screen.
+     */
+    private void displayNumberOrdered(int number) {
+        TextView numberOrderedTextView = (TextView) findViewById(R.id.number_ordered_text_view);
+        numberOrderedTextView.setText("" + number);
+    }
+
+    /**
+     * This method is called when the order button is clicked.
+     */
+    private void submitOrderEmail() {
+
+        String name = mNameTextView.getText().toString();
+        String supplier = mSupplierTextView.getText().toString();
+        String numberOrdered = mNumberOrderedTextView.getText().toString();
+
         if (mImageUri != null) {
-            String subject = "Order";
-            String stream = "Please Send 10 " + mProductName + "\n"
-                    + "Product image: \n";
+            String subject = name + " Order for " + supplier;
+            String stream = createOrderMessage(name, numberOrdered);
 
             Intent shareIntent = ShareCompat.IntentBuilder.from(this)
                     .setStream(mImageUri)
@@ -152,8 +249,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             startActivityForResult(Intent.createChooser(shareIntent, "Share with"), SEND_MAIL_REQUEST);
 
         } else {
-            String subject = "Order ";
-            String stream = "Please Send 10 " + mProductName + "\n";
+            String subject = name + " Order for " + supplier;
+            String stream = createOrderMessage(name, numberOrdered);
 
             Intent shareIntent = ShareCompat.IntentBuilder.from(this)
                     .setSubject(subject)
@@ -234,14 +331,10 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
     }
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
 
-        if (mCurrentProductUri == null) {
-            MenuItem menuItem = menu.findItem(R.id.action_delete);
-            menuItem.setVisible(false);
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_detail, menu);
         return true;
     }
 
@@ -273,6 +366,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void saveProduct() {
         String nameString = mNameTextView.getText().toString().trim();
         String quantityString = mQuantityTextView.getText().toString().trim();
@@ -302,7 +396,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             } else {
                 Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_SHORT).show();
             }
-        }else {
+        } else {
 
             int rowsAffected = getContentResolver().update(mCurrentProductUri, values, null, null);
 
@@ -375,6 +469,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 }
             }
         });
+        AlertDialog shower = builder.create();
+        shower.show();
     }
 
     @Override
@@ -390,7 +486,18 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 finish();
             }
         };
+
+        showUnsavedChangesDialog(discardButtonClickListener);
     }
+
+    private String createOrderMessage(String productName, String numberOrdered) {
+        String messageText = "Please send the following: \n";
+        messageText += "Product" + ": " + productName;
+        messageText += "\n" + "Quantity" + ": " + numberOrdered;
+        messageText += "\n" + "Thank you!";
+        return messageText;
+    }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -427,17 +534,24 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             mNameTextView.setText(name);
             mQuantityTextView.setText(String.valueOf(quantity));
             mPriceTextView.setText(String.valueOf(price));
-            mSoldTextView.setText(String.valueOf(sold));
             mSupplierTextView.setText(supplier);
 
-            if (!image.isEmpty()) {
-                mImageUri = Uri.parse(image);
-                mBitmap = getBitmapFromUri(mImageView, mImageUri, DetailActivity.this);
-                mImageView.setImageBitmap(mBitmap);
-            }
+            ViewTreeObserver viewTreeObserver = mImageView.getViewTreeObserver();
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    mImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    if (!image.isEmpty()) {
+                        mImageUri = Uri.parse(image);
+                        mBitmap = getBitmapFromUri(mImageView, mImageUri, DetailActivity.this);
+                        mImageView.setImageBitmap(mBitmap);
+                    }
+                }
+            });
         }
     }
 
+    // TODO re evaluate this for detail activity
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mNameTextView.clearComposingText();
