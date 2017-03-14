@@ -79,9 +79,10 @@ public class ProductCursorAdaptor extends CursorAdapter {
                     resolver.update(currentProductUri, values, null, null);
                     mContexts.getContentResolver().notifyChange(currentProductUri, null);
 
-
                     Toast.makeText(context, "Sold one " + productName, Toast.LENGTH_SHORT).show();
+
                 } else if (quantity == 0) {
+
                     Toast.makeText(context, R.string.quantity_is_zero_result_toast, Toast.LENGTH_SHORT);
                 }
             }

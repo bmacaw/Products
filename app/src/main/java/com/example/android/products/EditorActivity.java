@@ -129,8 +129,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = mQuantityEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
 
-        /*
-        * Compare product name to existing products in the database and
+        /* Compare product name to existing products in the database and
         * check for null string values for product name, price and supplier.
         */
         if (isExistingProduct(nameString)) {
