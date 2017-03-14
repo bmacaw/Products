@@ -62,7 +62,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products";
     // TODO remove or use
-    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_PREFIX = "JPEG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static final String CAMERA_DIR = "/dcim/";
     public String currentImagePath;
@@ -196,10 +196,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     * These methods check validity for entries in product name, quantity,
     * price, image and supplier edit text fields.
     */
-    // TODO remove
     private boolean isInvalidStringForField(String string) { return string == null || string.equals(""); }
-    private boolean isInvalidIntegerForField(int quantity) { return  quantity < 0;}
-    private boolean isInvalidDoubleForField(double price) { return price < 0;}
 
     /*
     * This method generates a toast message to the user indicating one or more invalid entries.
@@ -207,38 +204,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private void createToastMessage (String toastMessage) {
         Toast.makeText(EditorActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
     }
-
-    // TODO remove or use
-
-    /*@Override
-    protected void onSaveInstanceState(Bundle savedInstanceState) {
-        if (currentImagePath != null) {
-            savedInstanceState.putString(CAPTURED_IMAGE_PATH_KEY, currentImagePath);
-        }
-        if (mImageUri != null) {
-            savedInstanceState.putString(CAPTURED_IMAGE_URI_KEY, mImageUri.toString());
-        }
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState.containsKey(CAPTURED_IMAGE_PATH_KEY)) {
-            currentImagePath = savedInstanceState.getString(CAPTURED_IMAGE_PATH_KEY);
-        }
-        if (savedInstanceState.containsKey(CAPTURED_IMAGE_URI_KEY)) {
-            mImageUri = Uri.parse(savedInstanceState.getString(CAPTURED_IMAGE_URI_KEY));
-        }
-        ViewTreeObserver treeObserver = mImageView.getViewTreeObserver();
-        treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
-                mImageView.setImageBitmap(mBitmap);
-            }
-        });
-        super.onRestoreInstanceState(savedInstanceState);
-    }*/
 
     public void requestPermissions() {
         // Here, thisActivity is the current activity
@@ -398,6 +363,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
              * ...**/
             parcelFileDescriptor = context.getContentResolver().openFileDescriptor(uri, "r");
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+
             BitmapFactory.Options options = new BitmapFactory.Options();
             //put to null while decoding -> avoid memory allocation
             options.inJustDecodeBounds = true;
