@@ -317,8 +317,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 mImageUri = resultData.getData();
                 Log.i(LOG_TAG, "Uri: " + mImageUri.toString());
 
-
-                mImageTextView.setText(mImageUri.toString());
                 mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
                 mImageView.setImageBitmap(mBitmap);
                 mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -327,7 +325,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Log.i(LOG_TAG, "Uri: " + mImageUri.toString());
 
-            mImageTextView.setText(mImageUri.toString());
             mBitmap = getBitmapFromUri(mImageView, mImageUri, EditorActivity.this);
             mImageView.setImageBitmap(mBitmap);
             mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);

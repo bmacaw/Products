@@ -83,7 +83,7 @@ public class ProductCursorAdaptor extends CursorAdapter {
 
                 } else if (quantity == 0) {
 
-                    Toast.makeText(context, R.string.quantity_is_zero_result_toast, Toast.LENGTH_SHORT);
+                    Toast.makeText(context, R.string.quantity_is_zero_result_toast, Toast.LENGTH_SHORT).show();
                 }
             }
 
