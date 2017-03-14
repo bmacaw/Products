@@ -441,13 +441,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
         //Create access to storage directory DCIM
         File albumF = getAlbumDir();
         //Create image File
         File imageF = File.createTempFile(
                 imageFileName,
-                ".jpg",
+                JPEG_FILE_SUFFIX,
                 albumF
 
         );
