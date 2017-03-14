@@ -51,19 +51,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
-    // TODO remove
-    private static final int EXISTING_PRODUCT_LOADER = 0;
-
     private static final int PICK_IMAGE_REQUEST = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 2;
 
-    // TODO remove
-    private static final String CAPTURED_IMAGE_PATH_KEY = "currentImagePath";
-    private final static String CAPTURED_IMAGE_URI_KEY = "mImageUri";
-
-    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products";
-    // TODO remove or use
+    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.products.FileProvider";
     private static final String JPEG_FILE_PREFIX = "JPEG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static final String CAMERA_DIR = "/dcim/";
@@ -73,8 +65,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mPriceEditText;
     private ImageView mImageView;
     private EditText mSupplierEditText;
-    // TODO remove later
-    private TextView mImageTextView;
     private Bitmap mBitmap;
     private Button mSelectImageButton;
     private Button mTakePictureButton;
@@ -107,10 +97,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
         mSupplierEditText = (EditText) findViewById(R.id.edit_supplier);
         mImageView = (ImageView) findViewById(R.id.editor_image_view);
-
-        // TODO remove
-        mImageTextView = (TextView) findViewById(R.id.image_text_view);
-
         mSelectImageButton = (Button) findViewById(R.id.select_image_button);
 
         mTakePictureButton = (Button) findViewById(R.id.take_picture_button);

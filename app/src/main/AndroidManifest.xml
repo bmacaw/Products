@@ -45,8 +45,12 @@
         </activity>
 
         <provider
-            android:name=".data.ProductProvider"
             android:authorities="com.example.android.products"
+            android:name=".data.ProductProvider"/>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.android.products.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
