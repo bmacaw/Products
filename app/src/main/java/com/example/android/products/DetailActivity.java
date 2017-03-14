@@ -550,8 +550,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             });
         }
     }
-
-    // TODO re evaluate this for detail activity
+    
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mNameTextView.clearComposingText();

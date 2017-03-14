@@ -3,7 +3,6 @@ package com.example.android.products;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,16 +64,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         getLoaderManager().initLoader(PRODUCT_LOADER, null, this);
     }
 
-    private void insertProduct() {
-
-        ContentValues values = new ContentValues();
-        values.put(ProductEntry.COLUMN_PRODUCT_NAME, "Blue Glass Paperweight");
-        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 4);
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, 24.95);
-
-        Uri newUri = getContentResolver().insert(ProductEntry.CONTENT_URI, values);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -86,9 +75,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.action_insert_sample_data:
-                insertProduct();
-                return true;
             case R.id.action_delete_all_entries:
                 showDialogBoxForDeleteAllProducts();
                 return true;

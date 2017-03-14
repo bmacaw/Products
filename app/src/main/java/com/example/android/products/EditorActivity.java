@@ -51,12 +51,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
+    // TODO remove
     private static final int EXISTING_PRODUCT_LOADER = 0;
 
     private static final int PICK_IMAGE_REQUEST = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 2;
 
+    // TODO remove
     private static final String CAPTURED_IMAGE_PATH_KEY = "currentImagePath";
     private final static String CAPTURED_IMAGE_URI_KEY = "mImageUri";
 
@@ -196,12 +198,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     * These methods check validity for entries in product name, quantity,
     * price, image and supplier edit text fields.
     */
-    private boolean isInvalidStringForField(String string) { return string == null || string.equals(""); }
+    private boolean isInvalidStringForField(String string) {
+        return string == null || string.equals("");
+    }
 
     /*
     * This method generates a toast message to the user indicating one or more invalid entries.
     */
-    private void createToastMessage (String toastMessage) {
+    private void createToastMessage(String toastMessage) {
         Toast.makeText(EditorActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
     }
 
