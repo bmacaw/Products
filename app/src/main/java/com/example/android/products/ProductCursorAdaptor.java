@@ -49,6 +49,7 @@ public class ProductCursorAdaptor extends CursorAdapter {
         final Cursor cursorValue = cursor;
         String quantityString = "In Stock: " + quantity;
         String priceString = "Price $" + priceValue;
+        final int position = cursor.getPosition();
         final Uri currentProductUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, Long.parseLong(productId));
 
         nameTextView.setText(productName);
@@ -59,10 +60,13 @@ public class ProductCursorAdaptor extends CursorAdapter {
             @Override
             public void onClick(View view) {
 
+                cursor.moveToPosition(position);
+
                 ContentResolver resolver = view.getContext().getContentResolver();
                 ContentValues values = new ContentValues();
 
                 if (quantity > 0) {
+
                     int quantity = cursorValue.getInt(cursorValue.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY));
                     int sold = cursorValue.getInt(cursorValue.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SOLD));
 
@@ -74,6 +78,7 @@ public class ProductCursorAdaptor extends CursorAdapter {
 
                     resolver.update(currentProductUri, values, null, null);
                     mContexts.getContentResolver().notifyChange(currentProductUri, null);
+
 
                     Toast.makeText(context, "Sold one " + productName, Toast.LENGTH_SHORT).show();
                 } else if (quantity == 0) {
