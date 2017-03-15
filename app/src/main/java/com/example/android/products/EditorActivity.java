@@ -153,6 +153,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             } else {
                 Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_SHORT).show();
             }
+            finish();
         }
     }
 
@@ -456,7 +457,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             case R.id.action_save:
                 saveProduct();
-                finish();
                 return true;
             case R.id.action_delete:
                 showDeleteConfirmationDialog();
