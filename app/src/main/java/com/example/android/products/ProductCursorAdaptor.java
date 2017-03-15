@@ -85,38 +85,6 @@ public class ProductCursorAdaptor extends CursorAdapter {
                     Toast.makeText(context, R.string.quantity_is_zero_result_toast, Toast.LENGTH_SHORT).show();
                 }
             }
-
-            /*{
-
-
-                int quantity;
-                if (quantityTextView.getText().toString().isEmpty()) {
-                    quantity = 0;
-                } else {
-                    quantity = Integer.parseInt(quantityTextView.getText().toString());
-                }
-
-                if (quantity > 0) {
-                    quantity = quantity - 1;
-                    quantityTextView.setText(String.valueOf(quantity));
-
-                    ContentValues values = new ContentValues();
-                    values.put(ProductEntry.COLUMN_PRODUCT_NAME, productName);
-                    values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
-                    values.put(ProductEntry.COLUMN_PRODUCT_PRICE, priceValue);
-                    //values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, image);
-                    //values.put(ProductEntry.COLUMN_PRODUCT_SOLD, sold);
-                    //values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplier);
-
-                    int rowsAffected = context.getContentResolver().update(currentProductUri, values, null, null);
-                    if(rowsAffected == 0) {
-                        Toast.makeText(context, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(context, "Sold one " + productName, Toast.LENGTH_SHORT).show();
-                    }
-                    Toast.makeText(context, R.string.quantity_is_zero_result_toast, Toast.LENGTH_SHORT).show();
-                }
-            }*/
         });
     }
 }
