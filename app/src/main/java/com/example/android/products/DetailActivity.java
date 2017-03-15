@@ -235,14 +235,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     .setText(stream)
                     .getIntent();
 
-            if (mImageUri != null) {
-                shareIntent = ShareCompat.IntentBuilder.from(this)
-                        .setSubject(subject)
-                        .setText(stream)
-                        .getIntent();
-
-            }
-
             shareIntent.setData(mImageUri);
             shareIntent.setType("message/rfc822");
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -252,9 +244,26 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             } else {
                 shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
             }
-
             startActivityForResult(Intent.createChooser(shareIntent, "Share with"), SEND_MAIL_REQUEST);
+        } else {
 
+            String subject = name + " Order for " + supplier;
+            String stream = createOrderMessage(name, numberOrdered);
+
+            Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+                    .setSubject(subject)
+                    .setText(stream)
+                    .getIntent();
+
+            shareIntent.setType("message/rfc822");
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            if (Build.VERSION.SDK_INT < 21) {
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            } else {
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            }
+            startActivityForResult(Intent.createChooser(shareIntent, "Share with"), SEND_MAIL_REQUEST);
         }
     }
 
